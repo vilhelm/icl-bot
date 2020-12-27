@@ -1,0 +1,6 @@
+grpcio-reflection
+discord.py
+pandas
+requests
+scipy
+trueskill

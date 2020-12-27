@@ -1,0 +1,40 @@
+syntax = "proto2";
+
+package icl;
+
+service Inhouse {
+  // Generate a new Riot Tournament Code.
+  rpc GetCodes (GetCodeRequest) returns (GetCodeResponse) {}
+
+  // Return game stats for a given tournament code.
+  rpc GetGameStats (GetGameStatsRequest) returns (GetGameStatsResponse) {}
+
+  // Return ordered player ratings.
+  rpc GetRatings (GetRatingsRequest) returns (GetRatingsResponse) {}
+}
+
+message GetCodeRequest {
+  // Number of codes to create.
+  required int32 count = 1 [default=1];
+}
+
+message GetCodeResponse {
+  // Generated tournament codes.
+  repeated string codes = 1;
+}
+
+message GetGameStatsRequest {
+  // Tournament code.
+  required string code = 1;
+}
+
+message GetGameStatsResponse {
+  // String representation of match json from Rito.
+  // This is repeated since it is possible to have multiple games played
+  // under the same code.
+  repeated string stats = 1;
+}
+
+message GetRatingsRequest {}
+message GetRatingsResponse {}
+

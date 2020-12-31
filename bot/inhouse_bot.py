@@ -28,35 +28,49 @@ class Inhouse(commands.Cog):
   def __init__(self, bot: commands.Bot, server: inhouse_pb2_grpc.InhouseStub):
     self.bot = bot
     self._server = server
-    self._active_message = None
+    # Dict of channel.id => message that can be reacted to trigger code.
+    self._active_messages = {}
     self._lock = threading.RLock()
 
 
   @commands.Cog.listener()
   async def on_reaction_add(self, reaction, user):
     """If 5 peeps react to the message, then we trigger a new code."""
+    message = reaction.message
+    channel = message.channel
+
     with self._lock:
+      if (channel.id not in self._active_messages or
+          self._active_messages[channel.id] != message):
+        return
+
       all_users = set()
-      for reaction in reaction.message.reactions:
+      for reaction in message.reactions:
         users = await reaction.users().flatten()
         all_users.update(users)
 
-      if reaction.message == self._active_message and len(all_users) >= 5:
-        self._active_message == None
+      logging.info('Reaction to valid message: %s users', len(all_users))
+
+      if len(all_users) >= 5:
+        logging.info('Generating code')
+        del self._active_messages[message]
         response = self._server.GetCodes(inhouse_pb2.GetCodeRequest(count=1))
-        await reaction.message.channel.send('Code: %s' % response.codes[0])
+        await channel.send('Code: %s' % response.codes[0])
 
   @commands.command(help='Start inhouse game if 5 or more peeps interested.')
   async def inhouse(self, ctx):
     with self._lock:
-      create_message = self._active_message is None
-      if not create_message:
-        # If existing message is >1 hour old, go ahead and create a new one.
-        time_difference = datetime.datetime.utcnow() - self._active_message.created_at
-        create_message = time_difference.total_seconds() > 60 * 60
+      should_create_message = True
 
-      if create_message:
-        self._active_message = await ctx.send('React if interested in playing')
+      if ctx.channel.id in self._active_messages:
+        # If existing message is >1 hour old, go ahead and create a new one.
+        active_message = self._active_messages[ctx.channel.id]
+        time_difference = datetime.datetime.utcnow() - active_message.created_at
+        should_create_message = time_difference.total_seconds() > 60 * 60
+
+      if should_create_message:
+        self._active_messages[ctx.channel.id] = await ctx.send(
+            'React if interested in playing')
 
   @commands.command(help='Get match results for a completed inhouse code.')
   async def match_results(self, ctx, code):

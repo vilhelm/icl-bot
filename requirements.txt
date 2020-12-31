@@ -1,3 +1,4 @@
+grpcio
 grpcio-reflection
 discord.py
 pandas

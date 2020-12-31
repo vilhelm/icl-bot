@@ -15,6 +15,7 @@ py_binary(
         "@io_abseil_py//absl:app",
         "@io_abseil_py//absl/flags",
         "@io_abseil_py//absl/logging",
+        requirement("grpcio"),
         requirement("grpcio-reflection"),
         requirement("pandas"),
     ],

@@ -10,9 +10,11 @@ py_binary(
     deps = [
         "//protos:inhouse_py_pb2",
         "//protos:inhouse_py_pb2_grpc",
+        "//server:game_manager",
         "@io_abseil_py//absl:app",
         "@io_abseil_py//absl/flags",
         "@io_abseil_py//absl/logging",
         requirement("discord.py"),
+        requirement("discord-py-slash-command"),
     ],
 )

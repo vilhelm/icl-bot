@@ -1,6 +1,7 @@
 grpcio
 grpcio-reflection
 discord.py
+discord-py-slash-command
 pandas
 requests
 scipy

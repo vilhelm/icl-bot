@@ -3,6 +3,16 @@ package(default_visibility = ["//visibility:public"])
 load("@pip//:requirements.bzl", "requirement")
 load("@rules_python//python:defs.bzl", "py_binary", "py_library")
 
+py_library(
+    name = "game_manager",
+    srcs = ["game_manager.py"],
+    deps = [
+        requirement("pandas"),
+        requirement("scipy"),
+        requirement("trueskill"),
+    ],
+)
+
 py_binary(
     name = "inhouse",
     srcs = ["inhouse.py"],
@@ -30,14 +40,13 @@ py_library(
     ],
 )
 
-py_library(
+py_binary(
     name = "rater",
     srcs = ["rater.py"],
+    python_version = "PY3",
     deps = [
-        "@io_abseil_py//absl/logging",
-        requirement("pandas"),
-        requirement("requests"),
-        requirement("scipy"),
-        requirement("trueskill"),
+        ":game_manager",
+        "@io_abseil_py//absl:app",
+        "@io_abseil_py//absl/flags",
     ],
 )

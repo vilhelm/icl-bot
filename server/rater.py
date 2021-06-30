@@ -17,6 +17,10 @@ def main(argv):
 
   print(leaderboard)
 
+  leaderboard = manager.get_leaderboard()
+
+  print(leaderboard)
+
 
 if __name__ == '__main__':
   app.run(main)

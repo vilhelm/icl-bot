@@ -16,5 +16,6 @@ py_binary(
         "@io_abseil_py//absl/logging",
         requirement("discord.py"),
         requirement("discord-py-slash-command"),
+        requirement("disputils"),
     ],
 )

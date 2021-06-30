@@ -14,6 +14,7 @@ import discord
 from discord.ext import commands
 from discord_slash import cog_ext, SlashCommand, SlashContext
 from discord_slash.utils import manage_commands
+from disputils import BotEmbedPaginator
 import grpc
 
 from protos import inhouse_pb2
@@ -52,7 +53,7 @@ class Inhouse(commands.Cog):
 
     with self._lock:
       if (channel.id not in self._active_messages or
-          self._active_messages[channel.id] != message):
+          self._active_messages[channel.id].id != message.id):
         return
 
       all_users = set()
@@ -69,7 +70,14 @@ class Inhouse(commands.Cog):
         await channel.send('Code: %s' % response.codes[0])
 
   @cog_ext.cog_slash(name="inhouse", description='Start inhouse if 5 of more peeps response.')
-  async def inhouse(self, ctx: SlashContext):
+  async def inhouse_slash(self, ctx: SlashContext):
+    await self._inhouse(ctx)
+
+  @commands.command(help='Start inhouse if 5 or more peeps interested.')
+  async def inhouse(self, ctx):
+    await self._inhouse(ctx)
+
+  async def _inhouse(self, ctx):
     with self._lock:
       should_create_message = True
 
@@ -93,7 +101,14 @@ class Inhouse(commands.Cog):
           required=True
       )]
   )
-  async def match_results(self, ctx: SlashContext, code: str):
+  async def match_results_slash(self, ctx: SlashContext, code: str):
+    await self._match_results(ctx, code)
+
+  @commands.command(help='Get match results for a completed inhouse code.')
+  async def match_results(self, ctx, code):
+    await self._match_results(ctx, code)
+
+  async def _match_results(self, ctx, code: str):
     logging.info('code: %s', code)
     try:
       response = self._server.GetGameStats(
@@ -109,14 +124,37 @@ class Inhouse(commands.Cog):
       await ctx.send(f'Failed to fetch match results for code: {code}')
 
   @cog_ext.cog_slash(name='swords', description='Flip a coin.')
-  async def swords(self, ctx: SlashContext):
+  async def swords_slash(self, ctx: SlashContext):
+    await self._swords(ctx)
+
+  @commands.command(help='Flip a coin.')
+  async def swords(self, ctx):
+    await self._swords(ctx)
+
+  async def _swords(self, ctx):
     coin_side = 'heads' if random.random() >= 0.5 else 'tails'
     await ctx.send('Swords flips a coin, it lands on %s!' % coin_side)
 
-  @cog_ext.cog_slash(name='leaderboard', description='Show the leaderboard.')
+  @commands.command(help='Show the leaderboard.')
   async def leaderboard(self, ctx: SlashContext):
     leaderboard = self._manager.get_leaderboard()
-    await ctx.send(str(leaderboard))
+    embeds = []
+    embed = discord.Embed(title='Leaderboard')
+    position = 0
+    for _, player in leaderboard.iterrows():
+      position += 1
+      embed.add_field(name=f'{position}: {player["name"]}', value=_format_player(player), inline=False)
+      if len(embed.fields) >= 10:
+        embeds.append(embed)
+        embed = discord.Embed(title='Leaderboard')
+    if len(embed.fields):
+      embeds.append(embed)
+    paginator = BotEmbedPaginator(ctx, embeds)
+    await paginator.run()
+
+
+def _format_player(player):
+  return '{rating:.2f} {wins}W {losses}L {kills}/{deaths}/{assists} ({kda:.1f})'.format(**player.to_dict())
 
 
 def main(argv):

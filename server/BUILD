@@ -7,6 +7,7 @@ py_library(
     name = "game_manager",
     srcs = ["game_manager.py"],
     deps = [
+        "@io_abseil_py//absl/logging",
         requirement("pandas"),
         requirement("scipy"),
         requirement("trueskill"),

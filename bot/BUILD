@@ -12,6 +12,8 @@ py_binary(
         "@abseil-py//absl:app",
         "@abseil-py//absl/flags",
         "@abseil-py//absl/logging",
+        "//server:game_manager",
         requirement("discord.py"),
+        requirement("disputils"),
     ],
 )

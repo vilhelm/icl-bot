@@ -9,20 +9,6 @@ import requests
 import trueskill
 
 SMURFS = {
-    'FiddleOnTheRoof': 'Fiddleshoox',
-    'Fiddlesteaks': 'Fiddleshoox',
-    'mujï': 'mujı',
-    'Undinelove': 'Transpiercer',
-    'Scilla15': 'SciIIa',
-    'The 1 Wh0 Nocs': 'TopNotch Noc Top',
-    'Topnotch Shooxt': 'TopNotch Noc Top',
-    'Topnotch Shoox': 'TopNotch Noc Top',
-    'Teptphanyaki': 'Tept',
-    'Lanolaven2': 'Lanolaven',
-    'Mystryl': 'Mystrl',
-    'Vatataosome': 'Noskver',
-    'Proxinity': 'El Cenzio',
-    '420lbs Grandma': '420kg Grandma'
 }
 
 version = requests.get('https://ddragon.leagueoflegends.com/api/versions.json').json()[0]

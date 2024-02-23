@@ -1,5 +1,6 @@
 """Discord bot for interacting with inhouse API."""
 
+import asyncio
 import io
 import random
 import threading
@@ -15,11 +16,12 @@ import grpc
 from protos import inhouse_pb2
 from protos import inhouse_pb2_grpc
 
-flags.DEFINE_string('discord_token', '', 'Discord API Token.')
-flags.DEFINE_string('inhouse_server_address', 'localhost:50051',
-    'host:port for inhouse server.')
-
-FLAGS = flags.FLAGS
+_DISCORD_TOKEN = flags.DEFINE_string('discord_token', '', 'Discord API Token.')
+_INHOUSE_SERVER_ADDRESS = flags.DEFINE_string(
+    'inhouse_server_address',
+    'localhost:50051',
+    'host:port for inhouse server.',
+)
 
 
 class Inhouse(commands.Cog):
@@ -80,23 +82,33 @@ class Inhouse(commands.Cog):
         'Match Results',
         file=discord.File(io.StringIO(response.stats[-1]), '%s.txt' % code))
 
-  @commands.command(help='Flip a coin.')
+  @commands.hybrid_command(help='Flip a coin.')
   async def swords(self, ctx):
     coin_side = 'heads' if random.random() >= 0.5 else 'tails'
     await ctx.send('Swords flips a coin, it lands on %s!' % coin_side)
+
+
+async def setup(bot):
+  channel = grpc.insecure_channel(_INHOUSE_SERVER_ADDRESS.value)
+  inhouse_stub = inhouse_pb2_grpc.InhouseStub(channel)
+
+  await bot.add_cog(Inhouse(bot, inhouse_stub))
 
 
 def main(argv):
   if len(argv) > 1:
     raise app.UsageError('Too many command-line arguments.')
 
-  channel = grpc.insecure_channel(FLAGS.inhouse_server_address)
-  inhouse_stub = inhouse_pb2_grpc.InhouseStub(channel)
+  intents = discord.Intents.default()
+  intents.message_content = True
 
   bot = commands.Bot(
-      command_prefix='!', description='Bot for organizing inhouses.')
-  bot.add_cog(Inhouse(bot, inhouse_stub))
-  bot.run(FLAGS.discord_token)
+      intents=intents,
+      command_prefix='!',
+      description='Bot for organizing inhouses.',
+  )
+  asyncio.run(setup(bot))
+  bot.run(_DISCORD_TOKEN.value)
 
 
 if  __name__ == '__main__':

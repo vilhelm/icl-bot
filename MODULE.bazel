@@ -1,0 +1,20 @@
+module(
+    name = "bot",
+    repo_name = "com_icl_bot",
+)
+
+bazel_dep(name = "rules_proto", version = "6.0.0-rc2")
+bazel_dep(name = "rules_proto_grpc_python", version = "5.0.0-alpha2")
+bazel_dep(name = "rules_python", version = "0.31.0")
+bazel_dep(name = "abseil-py", version = "1.4.0")
+
+python = use_extension("@rules_python//python/extensions:python.bzl", "python")
+python.toolchain(python_version = "3.11",)
+
+pip = use_extension("@rules_python//python/extensions:pip.bzl", "pip")
+pip.parse(
+    hub_name = "icl_pip_deps",
+    python_version = "3.11",
+    requirements_lock = ":requirements.txt",
+)
+use_repo(pip, "icl_pip_deps")

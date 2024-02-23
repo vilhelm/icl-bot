@@ -8,9 +8,6 @@ service Inhouse {
 
   // Return game stats for a given tournament code.
   rpc GetGameStats (GetGameStatsRequest) returns (GetGameStatsResponse) {}
-
-  // Return ordered player ratings.
-  rpc GetRatings (GetRatingsRequest) returns (GetRatingsResponse) {}
 }
 
 message GetCodeRequest {
@@ -34,7 +31,3 @@ message GetGameStatsResponse {
   // under the same code.
   repeated string stats = 1;
 }
-
-message GetRatingsRequest {}
-message GetRatingsResponse {}
-

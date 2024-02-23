@@ -35,7 +35,7 @@ class InhouseServicer(inhouse_pb2_grpc.InhouseServicer):
     self._api_key = api_key
 
   def GetCodes(self, request, context):
-    codes = riot_client.call('lol/tournament/v4/codes',
+    codes = riot_client.call('lol/tournament/v5/codes',
         api_key=self._api_key,
         params={'count': request.count, 'tournamentId': '1637307'},
         data='{"mapType": "SUMMONERS_RIFT","pickType": "TOURNAMENT_DRAFT","spectatorType": "ALL","teamSize": 5,"metadata": ""}')
